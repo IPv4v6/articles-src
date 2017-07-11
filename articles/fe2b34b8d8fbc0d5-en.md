@@ -2,8 +2,8 @@
 title:		'Compiling Docker from source on Kali Linux'
 author:		Stefan
 createdate:	2017-01-23
-modifydate:	2017-01-25
-categories:	[Docker, Kali]
+modifydate:	2017-07-11
+categories:	[Linux, Container]
 tags:		[Docker, Kali, Linux, compiler]
 slug:		compiling-docker-from-source-on-kali-linux
 status:		draft
@@ -41,9 +41,9 @@ build@kali:~$
 The build user clones the repositories and compiles the sources.
 
 ```
-git clone https://github.com/docker/docker.git
-cd docker
-git checkout 1.13.x
+git clone https://github.com/moby/moby
+cd moby
+git checkout v17.05.0-ce
 AUTO_GOPATH=1 ./hack/make.sh dynbinary
 ```
 
@@ -58,23 +58,23 @@ You will see this warning because we're not running Docker.
 Build containerd.
 
 ```
-cd ~
-git clone https://github.com/docker/containerd.git
-mkdir -p src/github.com/docker
-ln -s ~/containerd/ src/github.com/docker/containerd
-cd ~/src/github.com/docker/containerd
-git checkout v0.2.x
+mkdir -p ~/src/github.com/docker
+cd ~/src/github.com/docker
+git clone https://github.com/docker/containerd
+cd containerd
+git checkout v0.2.8
 GOPATH=~ make
 ```
 
 Build runc.
 
 ```
-cd ~
-git clone https://github.com/opencontainers/runc.git
+mkdir -p ~/src/github.com/opencontainers
+cd ~/src/github.com/opencontainers
+git clone https://github.com/opencontainers/runc
 cd runc
 git checkout v1.0.0-rc2
-make
+GOPATH=~ make
 ```
 
 ## Installation
@@ -83,21 +83,21 @@ As root install the binaries in `/usr/local/bin`.
 
 ```
 cp -ai \
-/home/build/containerd/bin/containerd \
-/home/build/containerd/bin/containerd-shim \
-/home/build/containerd/bin/ctr \
-/home/build/docker/bundles/1.13.0/dynbinary-client/docker-1.13.0 \
-/home/build/docker/bundles/1.13.0/dynbinary-daemon/dockerd-1.13.0 \
-/home/build/runc/runc \
+/home/build/src/github.com/docker/containerd/bin/containerd \
+/home/build/src/github.com/docker/containerd/bin/containerd-shim \
+/home/build/src/github.com/docker/containerd/bin/ctr \
+/home/build/moby/bundles/17.05.0-ce/dynbinary-client/docker-17.05.0-ce \
+/home/build/moby/bundles/17.05.0-ce/dynbinary-daemon/dockerd-17.05.0-ce \
+/home/build/src/github.com/opencontainers/runc/runc \
 /usr/local/bin/
 
 cd /usr/local/bin
-mv -i docker-1.13.0 docker
-mv -i dockerd-1.13.0 dockerd
-mv -i containerd docker-containerd
-mv -i containerd-shim docker-containerd-shim
-mv -i ctr docker-containerd-ctr
-mv -i runc docker-runc
+ln -s docker-17.05.0-ce docker
+ln -s dockerd-17.05.0-ce dockerd
+ln -s containerd docker-containerd
+ln -s containerd-shim docker-containerd-shim
+ln -s ctr docker-containerd-ctr
+ln -s runc docker-runc
 chown root.root *
 ```
 
